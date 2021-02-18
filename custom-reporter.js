@@ -8,28 +8,40 @@ class CustomReporter {
             ...options,
             logPath: options.logPath || 'jest-logs'
         }
+        this.passed = []
         this.failed = []
     }
 
     onTestResult(_, results) {
+        let passed = []
         let failed = []
         results.testResults.forEach(testResult => {
-            if (testResult.status === 'failed') {
+            if (testResult.status === 'passed') {
+                passed.push(testResult)
+            } else if (testResult.status === 'failed') {
                 failed.push(testResult)
             }
         })
 
+        this.passed = [
+            ...this.passed,
+            {
+                testFilePath: path.relative('.', results.testFilePath),
+                passed
+            }
+        ]
         this.failed = [
             ...this.failed,
             {
                 testFilePath: path.relative('.', results.testFilePath),
-                failed,
+                failed
             }
         ]
     }
 
     onRunComplete() {
         console.log('#########################################################')
+        console.log('passed', this.passed)
         console.log('failed', this.failed)
         console.log('#########################################################')
 
